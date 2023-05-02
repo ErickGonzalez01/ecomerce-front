@@ -96,6 +96,25 @@
                 </div>
 
             </b-modal>
+            
+            <div id="modal_exito" class="modal_exito">
+                <div class="modal_contenedor">
+                    <div class="imagen_modal">
+                        <img src="../assets/comprobado.png" />
+                    </div>
+
+                    <div>
+                        <h4>Exito, se inicio sesion como:</h4>
+                        <h3>{{ usuario.user.nombre }}</h3>
+                    </div>
+                    <div @click="modal_exito(false)" class="cerrar">
+                        <button>x</button>
+                    </div>
+                </div>
+            </div>
+
+
+
         </div>
 
         <div id="spiner-sesscion" class="spiner-sesscion">
@@ -104,6 +123,46 @@
     </div>
 </template>
 <style scoped>
+.imagen_modal img {
+    width: 70px;
+    height: 70px;
+    margin-right: 1rem;
+}
+
+.modal_contenedor {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    padding: 2rem;
+}
+
+.cerrar {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+}
+
+.close_modal_exito {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    background-color:rgba(0,0,0,0.5);
+    z-index:999;
+}
+
+.modal_exito {
+    width: 350px;
+    height: 190px;
+    background-color: #ffe601e0;
+    border-radius: 5px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index:1000
+}
+
 .spiner-sesscion {
     position: fixed;
     left: 50%;
@@ -199,6 +258,16 @@ export default {
 
     },
     methods: {
+        modal_exito: function (visible) {
+            const modal_exito = document.getElementById("modal_exito");
+            if (visible == true) {
+                modal_exito.style.display = "block";
+            }
+            if (visible == false) {
+                modal_exito.style.display = "none";
+            }
+
+        },
         filtro_de_busqueda: () => {
             const filtro_buqueda = document.getElementById("filtro_buqueda");
             let listaclases = filtro_buqueda.classList.contains("oculto");
@@ -219,14 +288,16 @@ export default {
             axios.post(this.URL_BASE + "/api/login", formData, { timeout: 10000 }).then(response => {
                 if (response.data.sesion == true) {
                     spinersesscion.style.display = "none";
-                    this.$refs["modalCenter"].hide();                    
+                    this.$refs["modalCenter"].hide();
                     this.setUsuario(response.data);
+                    this.modal_exito(true);
                 }
-            }).catch(error => {                
-                spinersesscion.style.display = "none";                
-                if(error.response.data.sesion==false){
+            }).catch(error => {
+                console.log("error");
+                spinersesscion.style.display = "none";
+                if (error.response.data.sesion == false) {
                     alert(error.response.data.error);
-                }else{
+                } else {
                     alert("Se produjo un error inesperado");
                 }
             });
@@ -245,10 +316,10 @@ export default {
             console.log("showmodalUsuario");
         },
         cerrarSesscion: function () {
-           this.CerrarSesion();
-           this.$refs["ModalUsuario"].hide();
+            this.CerrarSesion();
+            this.$refs["ModalUsuario"].hide();
         },
-        ...mapMutations(["setUsuario","CerrarSesion"])
+        ...mapMutations(["setUsuario", "CerrarSesion"])
     },
     computed: {
         ...mapState(["usuario", "URL_BASE"])
